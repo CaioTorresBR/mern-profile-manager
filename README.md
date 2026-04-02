@@ -1,2 +1,1 @@
-# mern-profile-manager
-A full-stack MERN profile management system featuring role-based access (Admin/User), JWT authentication, and external email validation
+MERN Profile Manager is a secure web application built with MongoDB, Express, React, and Node.js. It provides role-based access control for Administrators and standard Users, utilizing JWT for protected REST API routes. Key features include encrypted password storage, real-time email verification via external APIs, a custom random password generator, and a dynamic API documentation page adapted to user privileges.
