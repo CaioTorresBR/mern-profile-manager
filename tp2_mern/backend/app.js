@@ -5,7 +5,7 @@ require('dotenv').config();
 
 const express = require('express');
 const cors = require('cors');
-const {connectDB} = require('./services/mongoose').connectDB;
+const { connectDB } = require('./services/mongoose');
 const userRoutes = require('./routes/userRoutes');
 const mongoose = require('mongoose');
 
@@ -35,7 +35,7 @@ app.use('/motdepasse/:longueur', (req, res) => {
 // Start the server on the specified port
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-	console.log(`Server is running on port ${PORT}`);
+	console.log(`Server is running on port ${PORT}`)
 });
 
 module.exports = app; // exports the express app for use in server.js

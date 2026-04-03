@@ -1,7 +1,7 @@
 // Schema for User model
 
 const mongoose = require("mongoose");
-const uniqueValidator = require("mongoose-unique-validator");
+const mongooseUniqueValidator = require("mongoose-unique-validator").default;
 
 // Define the User schema with fields for username, email, and password
 const userSchema = new mongoose.Schema(
@@ -16,7 +16,7 @@ const userSchema = new mongoose.Schema(
 	},
 );
 
-userSchema.plugin(uniqueValidator);
+userSchema.plugin(mongooseUniqueValidator);
 
 // exports the User model based on the userSchema
 module.exports = mongoose.model("User", userSchema);
