@@ -13,7 +13,8 @@ function CreateUserForm() {
 		email : '',
 		password : '',
 	})
-
+	// hooks to store the created user and the message to display
+	const [user, setUser] = useState(null);
 	const [message, setMessage] = useState("");
 
 	// handleChange function to update the form state when the user types in the inputs
@@ -57,43 +58,63 @@ function CreateUserForm() {
     }
 
 	return (
-		// Form: saisir un pseudo, un courriel et un mot de passe
 		<div className="container">
-			{/* Username input */}
-			<div className="form-group">
-				<label for="username">Username:</label>
-				<input  
-                    type="text" className="form-control" id="username" value={form.username} onChange={handleChange} required/>
-			</div>
-			{/* Email input */}
-			<div className="form-group">
-				<label for="email">Email:</label>
-				<input type="email" className="form-control" id="email" value={form.email} onChange={handleChange} required/>
-			</div>
-			{/* Password input */}
-			<div className="form-group">
-				<label for="password">Password:</label>
-				<input type="password" className="form-control" id="pwd" value={form.password} onChange={handleChange} required/>
+			<form onSubmit={handleSubmit}>
+				{/* Username input */}
+					<label htmlFor="username">Username:</label>
+					<input
+						type="text"
+						className="form-control"
+						id="username"
+						name="username"
+						value={form.username}
+						onChange={handleChange}
+						required
+					/>
+				{/* Email input */}
+					<label htmlFor="email">Email:</label>
+					<input
+						type="email"
+						className="form-control"
+						id="email"
+						name="email"
+						value={form.email}
+						onChange={handleChange}
+						required
+					/>
+				{/* Password input */}
+				
+					<label htmlFor="password">Password:</label>
+					<input
+						type="password"
+						className="form-control"
+						id="pwd"
+						name="password"
+						value={form.password}
+						onChange={handleChange}
+						required
+					/>
 
-				{/* Button to generate a random password 
+					{/* Button to generate a random password 
                     
                     IMPLEMENTAR:
                     
                     */}
-				<button type="random-pwd" className="btn btn-secondary mt-2">
-					Generate random password
-				</button>
-			</div>
-			<div className="checkbox">
-				<label>
-					<input type="checkbox" /> Administrator Account
-				</label>
-			</div>
+					<button type="random-pwd" className="btn btn-secondary mt-2" onClick={generateRandomPassword}>
+						Generate random password
+					</button>
+				
+				<div className="checkbox">
+					<label>
+						<input type="checkbox" /> Administrator Account
+					</label>
+				</div>
 
-			{/* Submit button */}
-			<button type="submit" className="btn btn-primary mt-3">
-				Create user
-			</button>
+				{/* Submit button */}
+				<button type="submit" className="btn btn-primary mt-3">
+					Create user
+				</button>
+			</form>
 		</div>
 	);
 }
