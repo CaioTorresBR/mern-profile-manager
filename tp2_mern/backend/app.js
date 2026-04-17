@@ -10,7 +10,7 @@ const app = express();
 
 app.use(express.json()); 
 app.use(cors());
-
+np,m
 
 // connects to mongoDB database, logs error if connection fails
 connectDB().catch((err) => console.error("Error connecting to MongoDB:", err));
