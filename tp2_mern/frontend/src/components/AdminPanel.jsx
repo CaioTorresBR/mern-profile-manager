@@ -103,9 +103,9 @@ function AdminPanel(){
                         Data from the user
                     </div>
                     <div className='card-body'>
-                        <p className='card-text'><strong>ID</strong>{userFound.id}</p>
-                        <p className='card-text'><strong>Name</strong>{userFound.name}</p>
-                        <p className='card-text'><strong>Email</strong>{userFound.email}</p>
+                        <p className='card-text'><strong>ID: </strong>{userFound.id || userFound._id}</p>
+                        <p className='card-text'><strong>Name: </strong>{userFound.username || userFound._username}</p>
+                        <p className='card-text'><strong>Email: </strong>{userFound.email}</p>
                     </div>
                     
                     <button onClick={handleDelete} className='btn btn-danger w-100 mt-3'>

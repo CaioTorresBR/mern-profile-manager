@@ -37,7 +37,7 @@
 				const res = await fetch(`${import.meta.env.VITE_API_URL}/profils`,{
 					method: 'POST',
 					headers: {'Content-Type': 'application/json'},
-					body: JSON.stringify(form),
+					body: JSON.stringify(form),	
 				});
 
 				// response is stored inside data variable
@@ -50,7 +50,7 @@
 
 				// if user's created, sets the message with it's ID or with the message from the response
 				setMessage(data.message || `User created successfully with ID: ${data.userId}`);
-				setForm({ username: '', email: '', password: '' }); // clears the form
+				setForm({ username: '', email: '', password: '', isAdmin : false}); // clears the form
 
 
 			} catch(error){

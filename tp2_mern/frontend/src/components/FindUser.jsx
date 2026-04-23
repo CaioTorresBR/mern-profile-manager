@@ -29,9 +29,8 @@ const FindUser = ({ userId }) => {
 			// if response is ok, set the user state with the data and clear any previous messages
 			setUser(data);
 			setMessage("");
-			// set the form fields with the user data
-			setUsername(data.username);
-			setEmail(data.email);
+			setUsername(data.username || "");
+			setEmail(data.email || "");
 		} else {
 			setUser(null);
 			setMessage("User not found");
