@@ -43,7 +43,7 @@ router.post("/", async (req, res) => {
 // Retrieves a user by their ID
 router.get("/:id", async (req, res) => {
 	try {
-		const user = await User.findBy(req.params.id).select("-password"); // Exclude the password field from the result
+		const user = await User.findById(req.params.id).select("-password"); // Exclude the password field from the result
 		// If no user is found, return a 404 error
 		if (!user) {
 			return res.status(404).json({ message: "User not found" });
@@ -55,11 +55,16 @@ router.get("/:id", async (req, res) => {
 	}
 });
 
+// Read all
+router.get("/", async (req, res) => {
+    try{
+		const users = await User.find().select("-password")
+		res.json(users)
+	}catch(error){
+		res.status(500).json({message : "Connection error"})
+	}
 
-router.get("/", (req, res) => {
-    res.send({data: "Hello World"});
 });
-
 // /PUT /users/:id
 // Updates a user by their ID with the given username, email, and password.
 router.put("/:id", async (req, res) => {
@@ -102,6 +107,10 @@ router.delete("/:id", async (req, res) => {
 	try {
         // find the user by ID and delete it from the database
 		const deletedUser = await User.findByIdAndDelete(req.params.id);
+		if(!deletedUser){
+			return res.status(500).json({message: "User not found"})
+		}
+		return res.status(500).json({message: "User deleted"})
 
 	} catch (error) {
         res.status(500).json({ message: "User deletion error" });
