@@ -44,13 +44,27 @@ function AdminPanel(){
 
     };
 
-    const handleDelete = ()=>{
-
-        setMessage(`User ${userFound.name} deleted with succes`);
-        // Reinitialize the variables
-        setError(false);
-        setSearchId('')
-        setUserFound(null)
+    const handleDelete = async()=>{
+        // Ask the backend to delete
+        try{
+            const answer = await fetch(`http://localhost:3000/profils/${userFound.id}`, {
+                method: 'DELETE'
+            });
+        
+        if(answer.ok){
+            setMessage(`User ${userFound.name} deleted with succes`);
+            // Reinitialize the variables
+            setError(false);
+            setSearchId('')
+            setUserFound(null)
+        }else{
+            setMessage("Could not delet user")
+            setError(true);
+        }}catch(mistake){
+            console.error("Error with deletion" , mistake);
+            setMessage("Problem with connexion");
+            Error(true);
+        }
     };
     return(
 

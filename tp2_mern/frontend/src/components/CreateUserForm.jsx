@@ -12,6 +12,7 @@
 			username : '',
 			email : '',
 			password : '',
+			isAdmin : false
 		})
 		// hooks to store the created user and the message to display
 		const [user, setUser] = useState(null);
@@ -159,7 +160,13 @@
 					*/}
 					<div className="checkbox">
 						<label>
-							<input type="checkbox" /> Administrator Account
+							<input type="checkbox" 
+							name = "isAdmin"
+							/*The checkbox is marjed only if the user is an Admin */ 
+							checked = {form.isAdmin}
+							// If the checkbox is marked we update our form so isAdmin is True, otherwise will stay as false
+							onChange={(e)=> setForm ({... form , isAdmin:e.target.checked})}
+							/> Administrator Account
 						</label>
 					</div>
 					{/* Submit button */}
