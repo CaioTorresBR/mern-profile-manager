@@ -47,9 +47,12 @@ function AdminPanel(){
     const handleDelete = async()=>{
         // Ask the backend to delete
         try{
-            const answer = await fetch(`http://localhost:3000/profils/${userFound.id}`, {
-                method: 'DELETE'
-            });
+        // Usamos _id (padrão MongoDB) e a URL correta do ambiente
+        const url = `${import.meta.env.VITE_API_URL}/profils/${userFound._id}`;
+        
+        const answer = await fetch(url, {
+            method: 'DELETE'
+        });
         
         if(answer.ok){
             setMessage(`User ${userFound.name} deleted with succes`);

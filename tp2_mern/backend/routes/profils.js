@@ -13,7 +13,7 @@ Route parameters are named URL segments that capture values at specific position
 //  hashes the password before saving it to the database and returns the created user without the password in the response.
 router.post("/", async (req, res) => {
 	// Extract username, email, and password from the request body
-	const { username, email, password } = req.body;
+	const { username, email, password ,isAdmin } = req.body;
 
 	// sends error if there's no username, email, or password in the request
 	if (!username || !email || !password) {
@@ -22,10 +22,21 @@ router.post("/", async (req, res) => {
 			.json({ error: "Username, email, and password are required" });
 	}
 	try {
+		// Validation of the email with the API from Mailero
+		const url = `https://api.zeruh.com/v1/verify?api_key=${process.env.EMAIL_API_KEY}&email_address=${email}`;
+		const verifyResponse = await fetch(url);
+		const verifyData = await verifyResponse.json();
+		console.log("Zeruh response:", verifyData);
+
+		// Verifies if the email is invalid
+		if (verifyData.status != "valid") {
+			return res.status(400).json({error: "The email is invalid"});
+		}
+		
 		// hash the password
 		const hashPwd = await bcrypt.hash(password, 12);
 		// create a new user
-		const newUser = new User({ username, email, password: hashPwd });
+		const newUser = new User({ username, email, password: hashPwd , isAdmin: isAdmin || false });
 		// save the new user to the database
 		const savedUser = await newUser.save();
 		// removes password from user object before sending it back in the response
@@ -33,6 +44,13 @@ router.post("/", async (req, res) => {
 		//
 		res.status(201).json(userData);
 	} catch (error) {
+		// Source: https://stackoverflow.com/questions/18032879/mongodb-difference-between-error-code-11000-and-11001
+		// Treating the case with the same email in 2 different accounts
+		if(error.code === 11000 ||error.message.includes("expected `email` to be unique")){
+			return res.status(400).json({
+				error:"Email already exist"
+			})
+		}
 		res
 			.status(500)
 			.json({ message: "Error creating user", error: error.message });
@@ -97,6 +115,8 @@ router.put("/:id", async (req, res) => {
             return res.status(404).json({ message: "User not found" });
         }
 
+		res.status(200).json(user);
+
 	} catch (error) {
 		res.status(500).json({ message: "User update error" });
 	}
@@ -110,7 +130,7 @@ router.delete("/:id", async (req, res) => {
 		if(!deletedUser){
 			return res.status(500).json({message: "User not found"})
 		}
-		return res.status(500).json({message: "User deleted"})
+		return res.status(200).json({message: "User deleted"})
 
 	} catch (error) {
         res.status(500).json({ message: "User deletion error" });

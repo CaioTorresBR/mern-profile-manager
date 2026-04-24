@@ -33,8 +33,11 @@
 			e.preventDefault();
 
 			try {
+		
+				// Debbuging
+				console.log("URL:", import.meta.env.VITE_API_URL);
 				// Send a POST request to the backend to create a new user with the form data
-				const res = await fetch(`${import.meta.env.VITE_API_URL}/profils`,{
+				const res = await fetch(`${import.meta.env.VITE_API_URL}/profils`,{	
 					method: 'POST',
 					headers: {'Content-Type': 'application/json'},
 					body: JSON.stringify(form),	
@@ -45,7 +48,7 @@
 
 				// throws error if response is not ok
 				if (!res.ok) {
-					throw new Error(data.message || 'Failed to create user');
+					throw new Error(data.error || data.message || 'Failed to create user');
 				}
 
 				// if user's created, sets the message with it's ID or with the message from the response
@@ -173,6 +176,15 @@
 					<button type="submit" className="btn btn-primary mt-3">
 						Create user
 					</button>
+					
+					{/*Error message */}
+					{message && (
+						<div className = "alert-danger mt-3">
+							{message}
+						</div>
+					)}
+
+
 				</form>
 			</div>
 		);
