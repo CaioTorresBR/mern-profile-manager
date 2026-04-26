@@ -29,10 +29,13 @@ router.post("/", async (req, res) => {
 		console.log("Zeruh response:", verifyData);
 
 		// Verifies if the email is invalid
-		if (verifyData.status != "valid") {
-			return res.status(400).json({error: "The email is invalid"});
+		const emailStatus = verifyData.result?.status;
+
+		if (emailStatus !== "deliverable") {
+		return res.status(400).json({
+			error: "The email is invalid"
+		});
 		}
-		
 		// hash the password
 		const hashPwd = await bcrypt.hash(password, 12);
 		// create a new user
