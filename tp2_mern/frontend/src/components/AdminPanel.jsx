@@ -15,7 +15,6 @@ function AdminPanel(){
         e.preventDefault();
 
         setError(false);
-        setMessage("Searching in the database ... ");
         setUserFound(null);
 
         try {
@@ -31,16 +30,17 @@ function AdminPanel(){
 
             }
             else {
+                const data = await answer.json();
                 setUserFound(null);
                 setError(true);
-                setMessage("Not such user with this id")
+                setMessage(data.error || data.message || "No user was found with this ID.")
             }
 
         }
         catch (mistake) {
-            console.error("Error with connexion", mistake);
+            console.error("Connection error", mistake);
             setUserFound(null);
-            setMessage("Problem with the connexion")
+            setMessage("Problem connecting to the server.")
             setError(true);
         }
     };
@@ -51,28 +51,25 @@ function AdminPanel(){
         // Usamos _id (padrão MongoDB) e a URL correta do ambiente
         const url = `${import.meta.env.VITE_API_URL}/profils/${userFound._id}`;
         
-        // stores name and username from user about to be deleted
-        const name = userFound.name;
-        const username = userFound.username;
-
         const answer = await fetch(url, {
             method: 'DELETE'
         });
+        const data = await answer.json();
         
     
         if(answer.ok){
-            setMessage(`User ${userFound.name} (${userFound.username}) deleted with succes`);
+            setMessage(data.message || `User ${userFound.username} deleted successfully.`);
             // Reinitialize the variables
             setError(false);
             setSearchId('')
             setUserFound(null)
         }else{
-            setMessage("Could not delet user")
+            setMessage(data.error || data.message || "Could not delete user.")
             setError(true);
         }}catch(mistake){
-            console.error("Error with deletion" , mistake);
-            setMessage("Problem with connexion");
-            Error(true);
+            console.error("Deletion error" , mistake);
+            setMessage("Problem connecting to the server.");
+            setError(true);
         }
     };
     return(

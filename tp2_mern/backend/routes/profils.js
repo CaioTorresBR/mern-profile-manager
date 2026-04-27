@@ -8,6 +8,22 @@ const bcrypt = require("bcrypt");
 
 Route parameters are named URL segments that capture values at specific positions in the URL. */
 
+// Helper function to validate email with Zeruh API
+const validateEmailWithZeruh = async (email) => {
+	const url = `https://api.zeruh.com/v1/verify?api_key=${process.env.EMAIL_API_KEY}&email_address=${encodeURIComponent(email)}`;
+	const verifyResponse = await fetch(url);
+	const verifyData = await verifyResponse.json();
+	console.log("Zeruh response:", verifyData);
+
+	const emailStatus = verifyData.result?.status;
+
+	if (emailStatus !== "deliverable") {
+		throw new Error("Please enter a valid email address.");
+	}
+
+	console.log("Email is valid");
+};
+
 // /POST /users
 // Creates a new user with the given username, email, and password.
 //  hashes the password before saving it to the database and returns the created user without the password in the response.
@@ -19,25 +35,11 @@ router.post("/", async (req, res) => {
 	if (!username || !email || !password) {
 		return res
 			.status(400)
-			.json({ error: "Username, email, and password are required" });
+			.json({ error: "Username, email, and password are required." });
 	}
 	try {
-		// Validation of the email with the API from Mailero
-		const url = `https://api.zeruh.com/v1/verify?api_key=${process.env.EMAIL_API_KEY}&email_address=${email}`;
-		// Fetches the response from the API and logs it to the console
-		const verifyResponse = await fetch(url);
-		// Parses the response as JSON and logs it to the console
-		const verifyData = await verifyResponse.json();
-		console.log("Zeruh response:", verifyData);
-
-		const emailStatus = verifyData.result?.status;
-
-		// Verifies if the email is invalid
-		if (emailStatus != "deliverable") {
-			return res.status(400).json({error: "The email is invalid"});
-		} else {
-			console.log("Email is valid");
-		}
+		// Validate email with Zeruh API
+		await validateEmailWithZeruh(email);
 		
 		// hash the password
 		const hashPwd = await bcrypt.hash(password, 12);
@@ -51,16 +53,25 @@ router.post("/", async (req, res) => {
 		res.status(201).json(userData);
 
 	} catch (error) {
+		// Handle email validation errors
+		if (error.message === "Please enter a valid email address.") {
+			return res.status(400).json({ error: "Please enter a valid email address." });
+		}
 		// Source: https://stackoverflow.com/questions/18032879/mongodb-difference-between-error-code-11000-and-11001
 		// Treating the case with the same email in 2 different accounts
 		if(error.code === 11000 ||error.message.includes("expected `email` to be unique")){
 			return res.status(400).json({
-				error:"Email already exist"
+				error:"This email is already associated with another account."
+			})
+		}
+		if(error.message.includes("expected `username` to be unique")){
+			return res.status(400).json({
+				error:"This username is already taken."
 			})
 		}
 		res
 			.status(500)
-			.json({ message: "Error creating user", error: error.message });
+			.json({ message: "We could not create the user. Please try again." });
 	}
 });
 
@@ -71,12 +82,12 @@ router.get("/:id", async (req, res) => {
 		const user = await User.findById(req.params.id).select("-password"); // Exclude the password field from the result
 		// If no user is found, return a 404 error
 		if (!user) {
-			return res.status(404).json({ message: "User not found" });
+			return res.status(404).json({ message: "No user was found with this ID." });
 		}
 		// If user is found, return the user data
 		res.json(user);
 	} catch (error) {
-		res.status(500).json({ message: "Connection error" });
+		res.status(400).json({ message: "Please enter a valid user ID." });
 	}
 });
 
@@ -86,7 +97,7 @@ router.get("/", async (req, res) => {
 		const users = await User.find().select("-password")
 		res.json(users)
 	}catch(error){
-		res.status(500).json({message : "Connection error"})
+		res.status(500).json({message : "We could not load the users. Please try again."})
 	}
 
 });
@@ -96,14 +107,17 @@ router.put("/:id", async (req, res) => {
 	// Extract username, email, and password from the request body
 	const { username, email, password } = req.body;
 
-	// handles error if there's no username, email, or password in the request
-	if (!username || !email || !password) {
+	// handles error if there's no username or email in the request
+	if (!username || !email) {
 		return res
 			.status(400)
-			.json({ error: "Username, email, and password are required" });
+			.json({ error: "Username and email are required." });
 	}
 
 	try {
+		// Validate email with Zeruh API
+		await validateEmailWithZeruh(email);
+		
         const updateData = {};
         
         if (username) updateData.username = username;
@@ -119,13 +133,27 @@ router.put("/:id", async (req, res) => {
 
 
         if (!user) {
-            return res.status(404).json({ message: "User not found" });
+            return res.status(404).json({ message: "No user was found with this ID." });
         }
 
 		res.status(200).json(user);
 
 	} catch (error) {
-		res.status(500).json({ message: "User update error" });
+		// Handle email validation errors
+		if (error.message === "Please enter a valid email address.") {
+			return res.status(400).json({ error: "Please enter a valid email address." });
+		}
+		if(error.code === 11000 ||error.message.includes("expected `email` to be unique")){
+			return res.status(400).json({
+				error:"This email is already associated with another account."
+			})
+		}
+		if(error.message.includes("expected `username` to be unique")){
+			return res.status(400).json({
+				error:"This username is already taken."
+			})
+		}
+		res.status(500).json({ message: "We could not update the user. Please try again." });
 	}
 });
 
@@ -135,12 +163,12 @@ router.delete("/:id", async (req, res) => {
         // find the user by ID and delete it from the database
 		const deletedUser = await User.findByIdAndDelete(req.params.id);
 		if(!deletedUser){
-			return res.status(500).json({message: "User not found"})
+			return res.status(404).json({message: "No user was found with this ID."})
 		}
-		return res.status(200).json({message: "User deleted"})
+		return res.status(200).json({message: "User deleted successfully."})
 
 	} catch (error) {
-        res.status(500).json({ message: "User deletion error" });
+        res.status(400).json({ message: "Please enter a valid user ID." });
     }
 });
 

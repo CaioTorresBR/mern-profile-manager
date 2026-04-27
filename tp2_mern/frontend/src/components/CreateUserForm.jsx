@@ -1,6 +1,5 @@
 // inspired by mern demo
 import { useState } from "react";
-import { createRoot } from "react-dom/client";
 import AdminPanel from "./AdminPanel";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
@@ -54,7 +53,7 @@ function CreateUserForm() {
 			}
 			// if user's created, sets the message with it's ID or with the message from the response
 			setMessage(
-				data.message || `User created successfully with ID: ${data.userId}`,
+				data.message || `User created successfully with ID: ${data._id}`,
 			);
 
 			setForm({ username: "", email: "", password: "", isAdmin: false }); // clears the form
@@ -84,6 +83,11 @@ function CreateUserForm() {
 			const data = await res.json();
 			console.log(data);
 
+			// throws error if response is not ok
+			if (!res.ok) {
+				throw new Error(data.error || data.message || "Failed to create random password");
+			}
+
 			// gets the generated password from the response
 			const randomPwd = data.password;
 
@@ -91,31 +95,17 @@ function CreateUserForm() {
 			setForm({ ...form, password: randomPwd });
 			setMessage("");
 			// displays the generated password in the page
-			document.getElementById("generated-pwd").textContent =
-				`Generated password: ${randomPwd}`;
-
-			// throws error if response is not ok
-			if (!res.ok) {
-				throw new Error(data.message || "Failed to create random password");
-			}
+			setRandomPwd(randomPwd);
 		} catch (error) {
 			// If there is an error, set the message state to the error message
 			setMessage(error.message || " Failed to generate random password.");
+			setRandomPwd("");
 		}
 	};
 
 	// update the length state when the user chooses the length from the dropdown menu
 	const handleLengthChange = (e) => {
 		setLength(e.target.value);
-	};
-
-	// controls the rendering of elements in the page
-	const renderContent = () => {
-		if (user.isAdmin) {
-			return <AdminPanel />;
-		} else if (!user.isAdmin && user != null) {
-			return <FindUser />;
-		}
 	};
 
 	return (
@@ -176,7 +166,9 @@ function CreateUserForm() {
 					>
 						Generate random password
 					</button>
-					<p id="generated-pwd"></p>
+					<p id="generated-pwd">
+						{randomPwd && `Generated password: ${randomPwd}`}
+					</p>
 				</div>
 
 				{/* Checkbox for administrator account 
