@@ -24,18 +24,21 @@ router.post("/", async (req, res) => {
 	try {
 		// Validation of the email with the API from Mailero
 		const url = `https://api.zeruh.com/v1/verify?api_key=${process.env.EMAIL_API_KEY}&email_address=${email}`;
+		// Fetches the response from the API and logs it to the console
 		const verifyResponse = await fetch(url);
+		// Parses the response as JSON and logs it to the console
 		const verifyData = await verifyResponse.json();
 		console.log("Zeruh response:", verifyData);
 
-		// Verifies if the email is invalid
 		const emailStatus = verifyData.result?.status;
 
-		if (emailStatus !== "deliverable") {
-		return res.status(400).json({
-			error: "The email is invalid"
-		});
+		// Verifies if the email is invalid
+		if (emailStatus != "deliverable") {
+			return res.status(400).json({error: "The email is invalid"});
+		} else {
+			console.log("Email is valid");
 		}
+		
 		// hash the password
 		const hashPwd = await bcrypt.hash(password, 12);
 		// create a new user
@@ -46,6 +49,7 @@ router.post("/", async (req, res) => {
 		const { password: _, ...userData } = savedUser.toObject();
 		//
 		res.status(201).json(userData);
+
 	} catch (error) {
 		// Source: https://stackoverflow.com/questions/18032879/mongodb-difference-between-error-code-11000-and-11001
 		// Treating the case with the same email in 2 different accounts

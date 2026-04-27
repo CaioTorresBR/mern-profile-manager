@@ -1,4 +1,5 @@
 import{useState} from 'react';
+import CreateUserForm from './CreateUserForm';
 
 //l'interface d'administration permettant de rechercher et de supprimer des utilisateurs
 function AdminPanel(){
@@ -8,40 +9,40 @@ function AdminPanel(){
     const[message, setMessage] = useState('');
     const[isError, setError] = useState(false);
 
-
     const handleSearch = async(e) => {
 
         // Avoid the reload of the screen
         e.preventDefault();
 
-        setMessage("Looking in the data base ... ");
+        setError(false);
+        setMessage("Searching in the database ... ");
         setUserFound(null);
 
-        try{
+        try {
             // We ask to our backend the the userID by using Fetch
-            const answer = await fetch(`http://localhost:3000/profils/${searchId}`);
+            const answer = await fetch(`${import.meta.env.VITE_API_URL}/profils/${searchId}`);
 
             // Verify the answer
-            if(answer.ok){
+            if (answer.ok) {
                 // Verify the content of the answer
                 const user = await answer.json();
                 setUserFound(user);
                 setMessage('');
+
             }
-            else{
+            else {
                 setUserFound(null);
                 setError(true);
                 setMessage("Not such user with this id")
             }
 
         }
-        catch(mistake){
+        catch (mistake) {
             console.error("Error with connexion", mistake);
             setUserFound(null);
             setMessage("Problem with the connexion")
             setError(true);
         }
-
     };
 
     const handleDelete = async()=>{
@@ -50,12 +51,17 @@ function AdminPanel(){
         // Usamos _id (padrão MongoDB) e a URL correta do ambiente
         const url = `${import.meta.env.VITE_API_URL}/profils/${userFound._id}`;
         
+        // stores name and username from user about to be deleted
+        const name = userFound.name;
+        const username = userFound.username;
+
         const answer = await fetch(url, {
             method: 'DELETE'
         });
         
+    
         if(answer.ok){
-            setMessage(`User ${userFound.name} deleted with succes`);
+            setMessage(`User ${userFound.name} (${userFound.username}) deleted with succes`);
             // Reinitialize the variables
             setError(false);
             setSearchId('')
@@ -107,7 +113,7 @@ function AdminPanel(){
                     </div>
                     <div className='card-body'>
                         <p className='card-text'><strong>ID: </strong>{userFound.id || userFound._id}</p>
-                        <p className='card-text'><strong>Name: </strong>{userFound.username || userFound._username}</p>
+                        <p className='card-text'><strong>Name: </strong>{userFound.username}</p>
                         <p className='card-text'><strong>Email: </strong>{userFound.email}</p>
                     </div>
                     
