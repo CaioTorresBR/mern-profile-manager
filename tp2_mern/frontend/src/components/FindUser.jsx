@@ -23,18 +23,23 @@ const FindUser = ({ userId }) => {
 				return;
 			}
 
-			const response = await fetch(`${API}/profils/${userId}`);
-			const data = await response.json();
+			try {
+				const response = await fetch(`${API}/profils/${userId}`);
+				const data = await response.json();
 
-			if (response.ok) {
-				// if response is ok, set the user state with the data and clear any previous messages
-				setUser(data);
-				setMessage("");
-				setUsername(data.username || "");
-				setEmail(data.email || "");
-			} else {
+				if (response.ok) {
+					// if response is ok, set the user state with the data and clear any previous messages
+					setUser(data);
+					setMessage("");
+					setUsername(data.username || "");
+					setEmail(data.email || "");
+				} else {
+					setUser(null);
+					setMessage(data.error || data.message || "User not found.");
+				}
+			} catch {
 				setUser(null);
-				setMessage("User not found");
+				setMessage("Problem connecting to the server.");
 			}
 		};
 
@@ -47,28 +52,32 @@ const FindUser = ({ userId }) => {
 		// Prevent the default form submission behavior
 		e.preventDefault();
 
-		// send a PUT request to the backend to update the user data with the form fields
-		const response = await fetch(`${API}/profils/${userId}`, {
-			method: "PUT",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ username, email, password }),
-		});
+		try {
+			// send a PUT request to the backend to update the user data with the form fields
+			const response = await fetch(`${API}/profils/${userId}`, {
+				method: "PUT",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ username, email, password }),
+			});
 
-		// response is stored inside data variable
-		const data = await response.json();
-		//
-		if (response.ok) {
-			setMessage("User updated successfully");
-			setUser(data);
-			setEditMode(false);
+			// response is stored inside data variable
+			const data = await response.json();
+			//
+			if (response.ok) {
+				setMessage("User updated successfully");
+				setUser(data);
+				setEditMode(false);
 
-			// Clear the password field and update username and email with the response data
-			setPassword("");
-			setUsername(data.username || "");
-			setEmail(data.email || "");
-		} else {
-			// if response is not ok, set message to the error message
-			setMessage("Error: Failed to update user " + data.message);
+				// Clear the password field and update username and email with the response data
+				setPassword("");
+				setUsername(data.username || "");
+				setEmail(data.email || "");
+			} else {
+				// if response is not ok, set message to the error message
+				setMessage(data.error || data.message || "Failed to update user.");
+			}
+		} catch {
+			setMessage("Problem connecting to the server.");
 		}
 	};
 
@@ -76,7 +85,9 @@ const FindUser = ({ userId }) => {
 		<div className="container">
 
 			{!user ? (
-				<div className="alert alert-warning mt-3">Loading user data.</div>
+				<div className={`alert ${message ? "alert-danger" : "alert-warning"} mt-3`}>
+					{message || "Loading user data."}
+				</div>
 			)
 			: 
 			(
