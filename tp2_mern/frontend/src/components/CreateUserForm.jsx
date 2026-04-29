@@ -195,19 +195,7 @@ function CreateUserForm() {
 				{/*Error message */}
 				{message && <div className="alert-danger mt-3">{message}</div>}
 			</form>
-			<>
-				{/* If user exists and is an admin, it'll display the admin panel*/}
-				{user &&
-					(user.isAdmin ? (
-						<AdminPanel />
-					) : (
-						<FindUser userId={user._id || user.userId} />
-						)
-					)
-				}
-			</>
 		</div>
 	);
 }
-
 export default CreateUserForm;

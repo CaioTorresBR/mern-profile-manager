@@ -24,7 +24,14 @@ const FindUser = ({ userId }) => {
 			}
 
 			try {
-				const response = await fetch(`${API}/profils/${userId}`);
+				
+				const token = localStorage.getItem("token");
+
+				const response = await fetch(`${API}/profils/${userId}`, {
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				});
 				const data = await response.json();
 
 				if (response.ok) {
@@ -54,9 +61,14 @@ const FindUser = ({ userId }) => {
 
 		try {
 			// send a PUT request to the backend to update the user data with the form fields
+			const token = localStorage.getItem("token");
+
 			const response = await fetch(`${API}/profils/${userId}`, {
 				method: "PUT",
-				headers: { "Content-Type": "application/json" },
+				headers: {
+					"Content-Type": "application/json",
+					Authorization: `Bearer ${token}`,
+				},
 				body: JSON.stringify({ username, email, password }),
 			});
 

@@ -1,4 +1,5 @@
 // inspired by MERN demo code
+const { authenticate, isAdmin, isOwnerOrAdmin } = require("../middleware/auth");
 const express = require("express");
 const router = express.Router();
 const User = require("../models/User.js");
@@ -77,7 +78,7 @@ router.post("/", async (req, res) => {
 
 // /GET /users/:id
 // Retrieves a user by their ID
-router.get("/:id", async (req, res) => {
+router.get("/:id",authenticate, isOwnerOrAdmin, async (req, res) => {
 	try {
 		const user = await User.findById(req.params.id).select("-password"); // Exclude the password field from the result
 		// If no user is found, return a 404 error
@@ -91,8 +92,8 @@ router.get("/:id", async (req, res) => {
 	}
 });
 
-// Read all
-router.get("/", async (req, res) => {
+// Read all only for admin
+router.get("/",authenticate, isAdmin, async (req, res) => {
     try{
 		const users = await User.find().select("-password")
 		res.json(users)
@@ -103,7 +104,7 @@ router.get("/", async (req, res) => {
 });
 // /PUT /users/:id
 // Updates a user by their ID with the given username, email, and password.
-router.put("/:id", async (req, res) => {
+router.put("/:id", authenticate,isOwnerOrAdmin, async (req, res) => {
 	// Extract username, email, and password from the request body
 	const { username, email, password } = req.body;
 
@@ -158,7 +159,8 @@ router.put("/:id", async (req, res) => {
 });
 
 // /DELETE /users/:id
-router.delete("/:id", async (req, res) => {
+// Only admins can delete someone
+router.delete("/:id",authenticate,isAdmin,  async (req, res) => {
 	try {
         // find the user by ID and delete it from the database
 		const deletedUser = await User.findByIdAndDelete(req.params.id);

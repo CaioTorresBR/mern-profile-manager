@@ -1,5 +1,5 @@
 import{useState} from 'react';
-import CreateUserForm from './CreateUserForm';
+
 
 //l'interface d'administration permettant de rechercher et de supprimer des utilisateurs
 function AdminPanel(){
@@ -18,8 +18,14 @@ function AdminPanel(){
         setUserFound(null);
 
         try {
+            const token = localStorage.getItem("token");
+            
             // We ask to our backend the the userID by using Fetch
-            const answer = await fetch(`${import.meta.env.VITE_API_URL}/profils/${searchId}`);
+            const answer = await fetch(`${import.meta.env.VITE_API_URL}/profils/${searchId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
 
             // Verify the answer
             if (answer.ok) {
@@ -51,12 +57,17 @@ function AdminPanel(){
         // Usamos _id (padrão MongoDB) e a URL correta do ambiente
         const url = `${import.meta.env.VITE_API_URL}/profils/${userFound._id}`;
         
+        const token = localStorage.getItem("token");
+
         const answer = await fetch(url, {
-            method: 'DELETE'
+            method: "DELETE",
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
         });
+
         const data = await answer.json();
-        
-    
+
         if(answer.ok){
             setMessage(data.message || `User ${userFound.username} deleted successfully.`);
             // Reinitialize the variables
